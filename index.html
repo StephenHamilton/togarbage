@@ -1,0 +1,149 @@
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <script src="/vendor/jquery.min.js"></script>
+    <script src="/vendor/togeojson.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?libraries=places" type="text/javascript"></script>
+    <style type="text/css">
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .controls {
+        margin-top: 16px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #location {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+
+      #location:focus {
+        border-color: #4d90fe;
+      }
+    </style>
+    <script>
+      var geocoder;
+      var map;
+      var data;
+      function mapInit() {
+        geocoder = new google.maps.Geocoder();
+        var mapOptions = {
+          center: { lat: 43.666296, lng: -79.392799},
+          zoom: 13
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        map.data.addListener('addfeature', function(event) {
+          var polygons = [];
+          var dataPolygons;
+          var geometry = event.feature.getGeometry();
+          if (geometry.getType() == 'Polygon') {
+            dataPolygons = [geometry];
+          } else {
+            dataPolygons = geometry.getArray();
+          }
+          for(i = 0; i < dataPolygons.length; i++) {
+            var rings = dataPolygons[i].getArray();
+            var latLats = [];
+            for(j = 0; j < rings.length; j++) {
+              latLats.push(rings[j].getArray());
+            }
+            polygons.push(new google.maps.Polygon({paths: latLats}));
+          }
+          event.feature.setProperty('polygons', polygons);
+          //console.log(feature);
+        });
+        map.data.loadGeoJson('/data/garbage.json');
+
+        var marker = new google.maps.Marker({
+          map: map,
+        });
+
+        var infowindow = new google.maps.InfoWindow();
+
+        var input = document.getElementById('location');
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', map);
+
+        google.maps.event.addListener(autocomplete, 'place_changed', function() {
+          marker.setVisible(false);
+          var place = autocomplete.getPlace();
+          if (!place.geometry) {
+            console.log("Autocomplete's returned place contains no geometry");
+            return;
+          }
+
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+          }
+          marker.setPosition(place.geometry.location);
+          marker.setVisible(true);
+
+          var name;
+
+          map.data.forEach(function(feature) {
+            var polygons = feature.getProperty('polygons');
+            for(i = 0; i < polygons.length; i++) {
+              if (google.maps.geometry.poly.containsLocation(
+                    place.geometry.location, polygons[i])) {
+                name = feature.getProperty("AREA_NAME");
+              }
+            }
+          });
+
+          if (name) {
+            infowindow.setContent(name);
+          } else {
+            infowindow.setContent("not found");
+          }
+
+          infowindow.open(map, marker);
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.open(map,marker);
+        });
+      }
+
+      function geocode() {
+        var address = document.getElementById("location").value;
+        geocoder.geocode( { 'address': address}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            map.setCenter(results[0].geometry.location);
+            var marker = new google.maps.Marker({
+                map: map,
+                position: results[0].geometry.location
+            });
+          } else {
+            alert("Geocode was not successful for the following reason: " + status);
+          }
+        });
+      }
+
+      google.maps.event.addDomListener(window, 'load', mapInit);
+    </script>
+  </head>
+  <body>
+    <input id="location" class="controls" type="text" placeholder="Enter a location"></input>
+    <div id="map-canvas"></div>
+  </body>
+</html>
