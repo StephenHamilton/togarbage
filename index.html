@@ -1,14 +1,55 @@
 <html>
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="http://maps.googleapis.com/maps/api/js?libraries=places" type="text/javascript"></script>
     <style type="text/css">
-      html, body, #map-canvas {
+      html, body {
         height: 100%;
+        width: 100%;
         margin: 0;
         padding: 0;
+        font-family: Roboto, Arial, sans-serif;
       }
+
+      #map {
+        -webkit-transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+        -moz-transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+        -ms-transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+        -o-transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+        transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      #map.transform_in {
+        -webkit-transition: opacity 0.5s ease-in-out;
+        -moz-transition: opacity 0.5s ease-in-out;
+        -ms-transition: opacity 0.5s ease-in-out;
+        -o-transition: opacity 0.5s ease-in-out;
+        transition: opacity 0.5s ease-in-out;
+        opacity: 1.0;
+        visibility: visible;
+      }
+
+      #map-canvas, #about{
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        position: absolute;
+      }
+
+      #about {
+        padding: 40px;
+        overflow-y: scroll;
+      }
+
+      #about_text {
+        max-width: 600px;
+      }
+
       .controls {
         margin-top: 16px;
         border: 1px solid transparent;
@@ -26,9 +67,37 @@
         padding: 12px 12px 0 12px;;
       }
 
+      .back_button {
+        color: rgb(55, 140, 50);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-block;
+      }
+        
+      .about_button {
+        cursor: pointer;
+        margin-bottom:15px;
+        overflow: hidden;
+        text-align: center;
+        position: relative;
+        color: white;
+        -webkit-user-select: none;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 4px 24px;
+        border-bottom-left-radius: 2px;
+        border-top-left-radius: 2px;
+        -webkit-background-clip: padding-box;
+        border: 1px solid rgba(0, 0, 0, 0.14902);
+        box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px;
+        min-width: 24px;
+        background-color: rgb(55, 140, 50);
+        background-clip: padding-box;
+      }
+
       #location {
         background-color: #fff;
-        font-family: Roboto;
         font-size: 15px;
         font-weight: 300;
         padding: 0 11px 0 13px;
@@ -44,6 +113,7 @@
       var geocoder;
       var map;
       var locationData;
+      var districtData;
       var debugData = {};
       function mapInit() {
         geocoder = new google.maps.Geocoder();
@@ -53,8 +123,8 @@
         //////////////
 
         var mapOptions = {
-          center: { lat: 43.666296, lng: -79.392799},
-          zoom: 13
+          center: { lat: 43.7, lng: -79.392799},
+          zoom: 11
         };
         map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
@@ -87,10 +157,17 @@
         }
         map.data.addListener('addfeature', featureAdded);
 
+        var featureStyle = {
+          strokeWeight: 0.5
+        }
+        map.data.setStyle(featureStyle);
+
         // TODO: merge the metadata in in the make script
         $.get('/data/metadata.json')
           .done(function(data) {
-            locationData = data;
+            console.log(data);
+            locationData = data["areas"];
+            districtData = data["districts"];
           }).fail(function() {
             console.log("that didn't work");
           }).always(function() {
@@ -118,6 +195,9 @@
         var controls = document.getElementById('controls');
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(controls);
 
+        var about = document.getElementById('about_control');
+        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(about);
+
         //////////////////
         // Autocomplete //
         //////////////////
@@ -125,23 +205,24 @@
         var autocomplete = new google.maps.places.Autocomplete(input);
         autocomplete.bindTo('bounds', map);
 
-        function placeChanged() {
+        function openInfo(position, viewport, street) {
           marker.setVisible(false);
-          var place = autocomplete.getPlace();
-          if (!place.geometry) {
-            console.log("Autocomplete's returned place contains no geometry");
-            // TODO: do something with the map here
+          infowindow.close();
+          if(!position) {
             return;
           }
 
-          if (place.geometry.viewport) {
-            map.fitBounds(place.geometry.viewport);
-          } else {
-            map.setCenter(place.geometry.location);
-            map.setZoom(17);  // Why 17?
+          if (viewport != "none") {
+            if (viewport) {
+              map.fitBounds(viewport);
+            } else {
+              map.setCenter(position);
+              map.setZoom(17);
+            }
           }
-          marker.setPosition(place.geometry.location);
+          marker.setPosition(position);
           marker.setVisible(true);
+
 
           var selectedFeature;
 
@@ -149,33 +230,99 @@
             var polygons = feature.getProperty('polygons');
             for(i = 0; i < polygons.length; i++) {
               if (google.maps.geometry.poly.containsLocation(
-                    place.geometry.location, polygons[i])) {
+                    position, polygons[i])) {
                 selectedFeature = feature;
               }
             }
           });
 
+          if (street) {
+            // TODO: add exception text
+            console.log(street);
+          }
+
           if (selectedFeature) {
             var name = selectedFeature.getProperty('AREA_NAME');
+            var district = selectedFeature.getProperty('Area');
             var day = name.replace(/\s.*$/,"");
+            var exception = "";
+            if (street && districtData[district]["exceptions"].hasOwnProperty(street.long_name)) {
+              var exceptionData = districtData[district]["exceptions"][street.long_name];
+              exception = "<p>Note: there is an exception for part of " + street.long_name + " that may effect you.</p><p>" + exceptionData["details"] + " If that includes you, use <a href=\"" + locationData[exceptionData["collection"]]["url"] + "\">this calendar</a> instead."
+            }
             infowindow.setContent("<div><p>Your garbage is picked up on " + day + ".</p>"
-                + "<p>Here is a link to the <a href=\"" + locationData[name]["url"] +  "\" target=\"_blank\" >full calendar</a></p></div>");
+                + "<p>Here is a link to the <a href=\"" + locationData[name]["url"] +  "\" target=\"_blank\" >full calendar</a></p>" + exception + "</div>");
           } else {
             infowindow.setContent("not found");
           }
 
           infowindow.open(map, marker);
         }
+
+        function placeChanged() {
+          var place = autocomplete.getPlace();
+
+          if (!place.geometry) {
+            openInfo(); // closes with no args.
+          } else {
+            var street = $.grep(place.address_components,function(component) {
+              return $.inArray("route", component.types) != -1;
+            })[0];
+            openInfo(place.geometry.location, place.geometry.viewport, street);
+          }
+        }
         google.maps.event.addListener(autocomplete, 'place_changed', placeChanged);
+
+        /////////////////
+        // Click event //
+        /////////////////
+
+        function placeClicked(event) {
+          if (!infowindow.get("map")) {
+            openInfo(event.latLng, "none");
+          }
+        }
+        map.data.addListener('click', placeClicked);
       }
 
+
       google.maps.event.addDomListener(window, 'load', mapInit);
+
+      function showMap() {
+        $('#map').addClass("transform_in");
+      }
+
+      function hideMap() {
+        $('#map').removeClass("transform_in");
+      }
     </script>
   </head>
   <body>
-    <div id="controls">
-      <input id="location" class="controls" type="text" placeholder="Enter your address"></input>
+    <div id="about">
+      <div onclick="showMap()" class="back_button">↩ Back</div>
+      <div id="about_text">
+        <h2>What is this?</h2>
+        <p>This site is a simple tool to look up your Toronto garbage schedule by entering your address.</p>
+        <h2>How do I use it?</h2>
+        <ol>
+          <li>Start typing your address into the search box</li>
+          <li>Select the correct address from the dropdown</li>
+        </ol>
+        <h2>Why did you make this?</h2>
+        <p>Because it boggled my mind that the only resource the city had for looking this up was coarsely drawn maps.</p>
+        <p>Compare this to Montreal where you just type in your postal code on the official site and it tells you your schedule.</p>
+        <h2>What are you legally required to tell us about the data you used?</h2>
+        <p>This site contains information licensed under the Open Government Licence – Toronto.</p>
+        <h2>Aren't you concerned about raccoons getting access to this information?</h2>
+        <p>How can you be sure I'm not a raccoon?</p>
+      </div>
     </div>
-    <div id="map-canvas"></div>
+    <div id="map" class="transform_in">
+      <div id="controls">
+        <input id="location" class="controls" type="text" placeholder="Enter your address" ></input>
+      </div>
+      <div id="about_control" class="about_button" onclick="hideMap()">Help</div>
+      <div id="map-canvas"></div>
+    </div>
   </body>
 </html>
