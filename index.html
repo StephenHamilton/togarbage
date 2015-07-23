@@ -163,7 +163,7 @@
         map.data.setStyle(featureStyle);
 
         // TODO: merge the metadata in in the make script
-        $.get('/data/metadata.json')
+        $.get('data/metadata.json')
           .done(function(data) {
             console.log(data);
             locationData = data["areas"];
@@ -171,7 +171,7 @@
           }).fail(function() {
             console.log("that didn't work");
           }).always(function() {
-            map.data.loadGeoJson('/data/garbage.json');
+            map.data.loadGeoJson('data/garbage.json');
           });
 
         // TODO: error handling on failed load

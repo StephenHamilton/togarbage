@@ -1,0 +1,66 @@
+{
+  "areas": {
+    "Tuesday 1": {"color": "#009B84", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/tuesday_1.pdf"},
+    "Tuesday 2": {"color": "#70CE73", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/tuesday_2.pdf"},
+    "Wednesday 1": {"color": "#FCAD56", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/wednesday_1.pdf"},
+    "Wednesday 2": {"color": "#FCD116", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/wednesday_2.pdf"},
+    "Thursday 1": {"color": "#0038A8", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/thursday_1.pdf"},
+    "Thursday 2": {"color": "#75AADB", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/thursday_2.pdf"},
+    "Friday 1": {"color": "#7251BC", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/friday_1.pdf"},
+    "Friday 2": {"color": "#B591D1", "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/friday_2.pdf"},
+    "Night collection": {"color": "white", "url": ""}
+  },
+  "districts": {
+    "District 1": {
+      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d1a.pdf",
+      "exceptions": {
+        "Seventh St": {
+          "collection": "Tuesday 1",
+          "details": "From Lakeshore Blvd. W. to the shoreline collection is on Tuesday on both sides."
+        }
+      }
+    },
+    "District 2": {
+      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d2.pdf",
+      "exceptions": {
+        "Annette St": {
+          "collection": "Friday 1",
+          "details": "From Runnymede Rd. to Keele St. collection is on Friday on both sides."
+        },
+        "Brooke Ave": {
+          "collection": "Tuesday 1",
+          "details": "From Bathurst St. to Mason Blvd. collection is on Tuesday on both sides."
+        },
+        "Keele St": {
+          "collection": "Friday 1",
+          "details": "From Bloor St. W. to Annette St. collection is on Friday on both sides."
+        },
+        "Runnymede Rd": {
+          "collection": "Friday 1",
+          "details": "From Annette St. to Dundas St. W. collection is on Friday on both sides."
+        },
+        "Vaughan Rd": {
+          "collection": "Thursday 1",
+          "details": "From Dufferin St. to Oakwood Ave. collection is on Thursday on both sides."
+        },
+        "Wychwood Ave": {
+          "collection": "Thursday 2",
+          "details": "From St. Clair Ave. W. to Vaughan Rd. collection is on Thursday on both sides."
+        }
+      }
+    },
+    "District 3": {
+      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d3.pdf",
+      "exceptions": {
+        "Nursewood Rd": {
+          "collection": "Tuesday 1",
+          "details": "From Queen St. E. to the lakefront collection is on Tuesday on both sides."
+        }
+      }
+    },
+    "District 4": {
+      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d4.pdf",
+      "exceptions": {}
+    }
+  }
+}
