@@ -12,7 +12,7 @@
   },
   "districts": {
     "District 1": {
-      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d1a.pdf",
+      "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d1a.pdf",
       "exceptions": {
         "Seventh St": {
           "collection": "Tuesday 1",
@@ -21,7 +21,7 @@
       }
     },
     "District 2": {
-      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d2.pdf",
+      "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d2.pdf",
       "exceptions": {
         "Annette St": {
           "collection": "Friday 1",
@@ -50,7 +50,7 @@
       }
     },
     "District 3": {
-      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d3.pdf",
+      "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d3.pdf",
       "exceptions": {
         "Nursewood Rd": {
           "collection": "Tuesday 1",
@@ -59,7 +59,7 @@
       }
     },
     "District 4": {
-      "link": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d4.pdf",
+      "url": "http://www1.toronto.ca/city_of_toronto/solid_waste_management_services/shared_content/files/calendars/d4.pdf",
       "exceptions": {}
     }
   }

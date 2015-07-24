@@ -238,22 +238,35 @@
             }
           });
 
-          if (street) {
-            // TODO: add exception text
-            console.log(street);
-          }
-
           if (selectedFeature) {
             var name = selectedFeature.getProperty('AREA_NAME');
             var district = selectedFeature.getProperty('Area');
-            var day = name.replace(/\s.*$/,"");
+            var day = name.replace(/\s?(\d)$/," ($1)");
             var exception = "";
             if (street && districtData[district]["exceptions"].hasOwnProperty(street.long_name)) {
               var exceptionData = districtData[district]["exceptions"][street.long_name];
-              exception = "<p>Note: there is an exception for part of " + street.long_name + " that may effect you.</p><p>" + exceptionData["details"] + " If that includes you, use <a href=\"" + locationData[exceptionData["collection"]]["url"] + "\">this calendar</a> instead."
+              exception = "<p>Note: there is an exception for part of "
+                + street.long_name
+                + " that may effect you.</p><p>"
+                + exceptionData["details"]
+                + " If that includes you, use <a href=\""
+                + locationData[exceptionData["collection"]]["url"]
+                + "\">this calendar</a> instead."
             }
-            infowindow.setContent("<div><p>Your garbage is picked up on " + day + ".</p>"
-                + "<p>Here is a link to the <a href=\"" + locationData[name]["url"] +  "\" target=\"_blank\" >full calendar</a></p>" + exception + "</div>");
+            console.log(name);
+            if (locationData.hasOwnProperty(name) && locationData[name].hasOwnProperty("url")) {
+              infowindow.setContent("<div><p>Your garbage is picked up on "
+                  + day
+                  + ".</p>"
+                  + "<p>Here is a link to the <a href=\""
+                  + locationData[name]["url"]
+                  +  "\" target=\"_blank\" >full calendar</a></p>"
+                  + exception
+                  + "</div>");
+            } else {
+              infowindow.setContent("<div><p>Your area does not have a collection calendar. Please call 3-1-1 for more info.</p></div>");
+            }
+
           } else {
             infowindow.setContent("not found");
           }
