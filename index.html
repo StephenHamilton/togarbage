@@ -112,12 +112,14 @@
       }
     </style>
     <script>
+
       var geocoder;
       var map;
       var locationData;
       var districtData;
-      var debugData = {};
+
       function mapInit() {
+        'use strict';
         geocoder = new google.maps.Geocoder();
 
         //////////////
@@ -139,38 +141,46 @@
           var polygons = [];
           var dataPolygons;
           var geometry = event.feature.getGeometry();
-          if (geometry.getType() == 'Polygon') {
+
+          if (geometry.getType() === 'Polygon') {
             dataPolygons = [geometry];
           } else {
             dataPolygons = geometry.getArray();
           }
-          for(i = 0; i < dataPolygons.length; i++) {
-            var rings = dataPolygons[i].getArray();
-            var latLats = [];
-            for(j = 0; j < rings.length; j++) {
+
+          var latLats;
+          var rings;
+          var i, j;
+
+          for (i = 0; i < dataPolygons.length; i+=1) {
+            rings = dataPolygons[i].getArray();
+            latLats = [];
+
+            for (j = 0; j < rings.length; j+=1) {
               latLats.push(rings[j].getArray());
             }
             polygons.push(new google.maps.Polygon({paths: latLats}));
           }
           var name = event.feature.getProperty('AREA_NAME');
+
           if (locationData.hasOwnProperty(name)) {
-            map.data.overrideStyle(event.feature, {fillColor: locationData[name]['color']})
+            map.data.overrideStyle(event.feature, {fillColor: locationData[name].color});
           }
+
           event.feature.setProperty('polygons', polygons);
         }
         map.data.addListener('addfeature', featureAdded);
 
         var featureStyle = {
           strokeWeight: 0.5
-        }
+        };
         map.data.setStyle(featureStyle);
 
         // TODO: merge the metadata in in the make script
         $.get('data/metadata.json')
           .done(function(data) {
-            console.log(data);
-            locationData = data["areas"];
-            districtData = data["districts"];
+            locationData = data.areas;
+            districtData = data.districts;
           }).fail(function() {
             console.log("that didn't work");
           }).always(function() {
@@ -215,7 +225,7 @@
             return;
           }
 
-          if (viewport != "none") {
+          if (viewport !== "none") {
             if (viewport) {
               map.fitBounds(viewport);
             } else {
@@ -228,6 +238,7 @@
 
 
           var selectedFeature;
+          var i;
 
           map.data.forEach(function(feature) {
             var polygons = feature.getProperty('polygons');
@@ -244,23 +255,22 @@
             var district = selectedFeature.getProperty('Area');
             var day = name.replace(/\s?(\d)$/," ($1)");
             var exception = "";
-            if (street && districtData[district]["exceptions"].hasOwnProperty(street.long_name)) {
-              var exceptionData = districtData[district]["exceptions"][street.long_name];
+            if (street && districtData[district].exceptions.hasOwnProperty(street.long_name)) {
+              var exceptionData = districtData[district].exceptions[street.long_name];
               exception = "<p>Note: there is an exception for part of "
                 + street.long_name
                 + " that may effect you.</p><p>"
-                + exceptionData["details"]
+                + exceptionData.details
                 + " If that includes you, use <a href=\""
-                + locationData[exceptionData["collection"]]["url"]
-                + "\">this calendar</a> instead."
+                + locationData[exceptionData.collection].url
+                + "\">this calendar</a> instead.";
             }
-            console.log(name);
             if (locationData.hasOwnProperty(name) && locationData[name].hasOwnProperty("url")) {
               infowindow.setContent("<div><p>Your garbage is picked up on "
                   + day
                   + ".</p>"
                   + "<p>Here is a link to the <a href=\""
-                  + locationData[name]["url"]
+                  + locationData[name].url
                   +  "\" target=\"_blank\" >full calendar</a></p>"
                   + exception
                   + "</div>");
@@ -282,7 +292,7 @@
             openInfo(); // closes with no args.
           } else {
             var street = $.grep(place.address_components,function(component) {
-              return $.inArray("route", component.types) != -1;
+              return $.inArray("route", component.types) !== -1;
             })[0];
             openInfo(place.geometry.location, place.geometry.viewport, street);
           }
