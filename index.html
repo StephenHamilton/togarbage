@@ -113,6 +113,8 @@
     </style>
     <script>
 
+      var GEO_THRESHOLD = 30;
+
       var geocoder;
       var map;
       var locationData;
@@ -255,10 +257,10 @@
             var district = selectedFeature.getProperty('Area');
             var day = name.replace(/\s?(\d)$/," ($1)");
             var exception = "";
-            if (street && districtData[district].exceptions.hasOwnProperty(street.long_name)) {
-              var exceptionData = districtData[district].exceptions[street.long_name];
+            if (street && districtData[district].exceptions.hasOwnProperty(street.short_name)) {
+              var exceptionData = districtData[district].exceptions[street.short_name];
               exception = "<p>Note: there is an exception for part of "
-                + street.long_name
+                + street.short_name
                 + " that may effect you.</p><p>"
                 + exceptionData.details
                 + " If that includes you, use <a href=\""
@@ -303,9 +305,28 @@
         // Click event //
         /////////////////
 
+        function findPoint(latLng) {
+          geocoder.geocode({'location': latLng}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              var result = results[0];
+              if (google.maps.geometry.spherical.computeDistanceBetween(latLng, result.geometry.location) < GEO_THRESHOLD) {
+                var street = $.grep(result.address_components,function(component) {
+                  return $.inArray("route", component.types) !== -1;
+                })[0];
+                openInfo(latLng, "none", street);
+              } else {
+                openInfo(latLng, "none");
+              }
+            } else {
+              console.error("Geocoding failed: %s", status);
+              openInfo(latLng, "none");
+            }
+          });
+        }
+
         function placeClicked(event) {
           if (!infowindow.get("map")) {
-            openInfo(event.latLng, "none");
+            findPoint(event.latLng);
           }
         }
         map.data.addListener('click', placeClicked);
