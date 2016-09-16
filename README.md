@@ -1,8 +1,10 @@
 # TO Garbage
 
-This is a little tool I built to look up your Toronto garbage calendar by address.
+This was a little tool I built to look up your Toronto garbage calendar by address.
 
-See the [live version](https://stephenhamilton.github.io/togarbage/) for more info or to give it a try.
+The city of toronto has actually built a tool to do this finally. Check it out [http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=239c433112b02410VgnVCM10000071d60f89RCRD](here) until they screw up that link because they don't provide any kind of permalinks.
+
+In the meantime the links to the schedules in mine were broken so I just took it down instead of fixing it. The source is left here for posterity.
 
 ## Setup
 
